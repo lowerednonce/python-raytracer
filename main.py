@@ -1,14 +1,13 @@
 #!/usr/bin/python3
-from PIL import Image
 import math
 import random as r
-import time
+from PIL import Image
 
-width=500
-height=500
-focalLenght = 50
-sample_rate = 25
-max_steps = 3
+WIDTH=500
+HEIGHT=500
+FOCAL_LENGHT = 50
+SAMPLE_RATE = 25
+MAX_STEPS = 3
 
 # color is emission
 objects = [
@@ -61,10 +60,13 @@ def draw(origin: [int], direction: [int], objs: [dict], steps : int):
         reflect_direction = reflect(direction, intersect["normal"]) 
 
         # TODO: should remove the intersected object from the list of objects passed in
-        col = add(intersect["obj"]["color"], mult_2(draw(reflect_origin, reflect_direction, objs, steps-1), intersect["obj"]["reflectivity"]))
+        col = add(
+                intersect["obj"]["color"], 
+                mult_2(
+                    draw(reflect_origin, reflect_direction, objs, steps-1),
+                    intersect["obj"]["reflectivity"]))
         return col
-    else:
-        return [0,0,0]
+    return [0,0,0]
 
 def reflect(direction : [int], normal : [int]):
     norm_len = dot(direction, normal) * 2
@@ -109,13 +111,13 @@ def intersection(origin, direction, objects):
 
     for o in objects:
         if o["shape"] == "sphere":
-            intersection = sphereIntersection(origin, direction, o)
-            if min_dist == None:
+            intersection = sphere_intersection(origin, direction, o)
+            if min_dist is None:
                 min_dist = intersection["dist"]
                 closest_intersection = intersection
                 closest_object = o
                 min_dist = intersection["dist"]
-            elif intersection["dist"] != None:
+            elif intersection["dist"] is not None:
                 if intersection["dist"] < min_dist:
                     closest_intersection = intersection
                     closest_object = o
@@ -131,7 +133,7 @@ def intersection(origin, direction, objects):
         }
 
 
-def sphereIntersection(origin: [int], direction: [int], sphere: dict):
+def sphere_intersection(origin: [int], direction: [int], sphere: dict):
     ray_sphere = sub(sphere["pos"], origin)
     dist_sphere = modulus(ray_sphere)
     dist_hit = dot(ray_sphere, direction)
@@ -149,46 +151,34 @@ def sphereIntersection(origin: [int], direction: [int], sphere: dict):
             "normal" : normal,
             "point" : point
         }
-    else:
-        return {
-            "collided": False,
-            "dist": None,
-            "normal" : None,
-            "point": None
-        }
-    
+    return {
+        "collided": False,
+        "dist": None,
+        "normal" : None,
+        "point": None
+    }
 
 if __name__ == "__main__":
-    img = Image.new(mode="RGB", size=(width, height))
+    img = Image.new(mode="RGB", size=(WIDTH, HEIGHT))
     pixmap = img.load()
 
-    total_rays = width*height*sample_rate
-    progress=0
-    print(f"Total rays to be cast: {total_rays*max_steps}")
-    
-    for i in range(0, width):
-        for j in range(0,height):
-            x = i-(width/2)
-            y = j-(height/2)
-            direction = normalize([x,y,focalLenght])
+    TOTAL_RAYS = WIDTH*HEIGHT*SAMPLE_RATE
+    PROGRESS=0
+    print(f"Total rays to be cast: {TOTAL_RAYS*MAX_STEPS}")
+    for i in range(0, WIDTH):
+        for j in range(0,HEIGHT):
+            x = i-(WIDTH/2)
+            y = j-(HEIGHT/2)
+            direction = normalize([x,y,FOCAL_LENGHT])
 
             col = [0,0,0]
-            # col1 = draw([0,0,0], direction, objects, 3)
-            # col = add(col, col1)
-            # col2 = draw([0,0,0], direction, objects, 3)
-            # col = add(col, col2)
-            # col3 = draw([0,0,0], direction, objects, 3)
-            # col = add(col, col3)
-            # if col1 != [0,0,0] or col2 != [0,0,0] or col3 != [0,0,0]:
-                # print("HIT")
-            for s in range(sample_rate):
-                col = add(col, draw([0,0,0], direction, objects, max_steps))
-            col = mult(col, 1/sample_rate)
+            for s in range(SAMPLE_RATE):
+                col = add(col, draw([0,0,0], direction, objects, MAX_STEPS))
+            col = mult(col, 1/SAMPLE_RATE)
 
             pixmap[i,j] = (round(col[0]), round(col[1]), round(col[2]))
-            progress += sample_rate
-            if (progress % 100000 == 0):
-                print(f"[PROGRESS] {round(progress/total_rays*100, 2)}%")
-    
+            PROGRESS += SAMPLE_RATE
+            if PROGRESS % 100000 == 0:
+                print(f"[PROGRESS] {round(PROGRESS/TOTAL_RAYS*100, 2)}%")
     img.save("result.png")
     print("DONE")

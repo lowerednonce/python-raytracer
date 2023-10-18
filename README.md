@@ -11,13 +11,13 @@ The theory is simple, and the code is only 165 SLoC. The scope of this project i
 ## Configuration
 Configuration is done through the `main.py` python file. The following is a table of configurable variables at the top of the file:
 
-| attribute   | description                                                                       |
-|-------------|-----------------------------------------------------------------------------------|
-| width       | set pixel width of the final image                                                |
-| height      | set pixel height of the final image                                               |
-| focalLenght | set FOV, the higher the more zoomed in                                            |
-| sample_rate | samples per pixel, higher values decrease noise at the expense of more operations |
-| max_steps   | maximum look depth for reflections                                                |
+| attribute    | description                                                                       |
+|--------------|-----------------------------------------------------------------------------------|
+| WIDTH        | set pixel width of the final image                                                |
+| HEIGHT       | set pixel height of the final image                                               |
+| FOCAL_LENGHT | set FOV, the higher the more zoomed in                                            |
+| SAMPLE_RATE  | samples per pixel, higher values decrease noise at the expense of more operations |
+| MAX_STEPS    | maximum look depth for reflections                                                |
 
 Furthermore, the objects are stored into a dictionary format. The only type of object supported is a sphere. Description of the structure is as follows:
 

@@ -1,7 +1,12 @@
 # python-raytracer
-A primitive ray-tracer built in python3 without the use of any helper libraries.
 
-The theory is simple, and the code is only 165 SLoC. The scope of this project is very limited, but it does what is supposed to.
+This is primitive ray-tracer built in python3 without the use of any helper libraries.
+
+The theory is simple, and the code is only 165 SLoC. The scope of this project is very limited, but it does what is supposed to. Further resources can be found at [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html) and [Ray Tracing from Scratch in 10 Minutes | Javascript](https://www.youtube.com/watch?v=aASyRKDpqhc)
+
+![Example render](result.png)
+
+*Example render in 500x500 pixels*
 
 ## Configuration
 Configuration is done through the `main.py` python file. The following is a table of configurable variables at the top of the file:

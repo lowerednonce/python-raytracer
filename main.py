@@ -57,11 +57,11 @@ def draw(origin: [int], direction: [int], objs: [dict], steps : int):
     intersect = intersection(origin, direction, objs)
     if intersect["collided"] and steps > 0:
         reflect_origin = intersect["point"]
-        reflect_direction = reflect(direction, intersect["normal"]) 
+        reflect_direction = reflect(direction, intersect["normal"])
 
         # TODO: should remove the intersected object from the list of objects passed in
         col = add(
-                intersect["obj"]["color"], 
+                intersect["obj"]["color"],
                 mult_2(
                     draw(reflect_origin, reflect_direction, objs, steps-1),
                     intersect["obj"]["reflectivity"]))

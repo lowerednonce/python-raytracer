@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+"""
+A simplistic raytracer in python, exports draw, intersection, and vector math functions
+"""
 import math
 import random as r
 from PIL import Image
@@ -53,76 +56,85 @@ objects = [
         },
         ]
 
-def draw(origin: [int], direction: [int], objs: [dict], steps : int):
-    intersect = intersection(origin, direction, objs)
+def draw(origin: [int], ray_direction: [int], objs: [dict], steps : int):
+    "Returns a pixel's color with a ray and objects passed in"
+    intersect = intersection(origin, ray_direction, objs)
     if intersect["collided"] and steps > 0:
         reflect_origin = intersect["point"]
-        reflect_direction = reflect(direction, intersect["normal"])
+        reflect_direction = reflect(ray_direction, intersect["normal"])
 
-        # TODO: should remove the intersected object from the list of objects passed in
-        col = add(
+        # might be worth looking into removing the intersected object from the list of objects
+        return add(
                 intersect["obj"]["color"],
                 mult_2(
                     draw(reflect_origin, reflect_direction, objs, steps-1),
                     intersect["obj"]["reflectivity"]))
-        return col
     return [0,0,0]
 
-def reflect(direction : [int], normal : [int]):
-    norm_len = dot(direction, normal) * 2
-    return sub(direction, mult(normal, norm_len))
+def reflect(ray_direction : [int], normal : [int]):
+    "Mathematics for ray reflection"
+    norm_len = dot(ray_direction, normal) * 2
+    return sub(ray_direction, mult(normal, norm_len))
 
 def normalize(vec : [int]):
+    "Normalize a 3 element vector"
     lenght=modulus(vec)
     return [vec[0]/lenght, vec[1]/lenght, vec[2]/lenght]
 
 def mult(vec: [int], a: int):
+    "Scalar multiplication of a three element vector"
     return [vec[0]*a, vec[1]*a, vec[2]*a]
 
 def mult_2(vec1: [int], vec2: [int]):
+    "Multiply two vectors' elements by each dimension"
     return [vec1[0]*vec2[0], vec1[1]*vec2[1], vec1[2]*vec2[2]]
 
 def sub(vec1: [int], vec2: [int]):
+    "Subtract two 3 element vectors"
     return [vec1[0]-vec2[0], vec1[1]-vec2[1], vec1[2]-vec2[2]]
 
 def add(vec1: [int], vec2: [int]):
+    "Add two 3 element vectors"
     return [vec1[0]+vec2[0], vec1[1]+vec2[1], vec1[2]+vec2[2]]
 
 def dot(vec1: [int], vec2: [int]):
+    "Calculate the dot product of two 3 element vectors"
     return vec1[0]*vec2[0] + vec1[1]*vec2[1] + vec1[2]*vec2[2]
 
 def modulus(vec : [int]):
+    "Calculate the magnitude of a 3 element vector"
     return math.sqrt(vec[0]**2 + vec[1]**2 + vec[2]**2 )
 
 def gen_rand():
+    "Generate a 3 element vector with random values between -0.5 and 0.5"
     return [r.random()-0.5, r.random()-0.5, r.random()-0.5]
 
-def to_tuple(vec: [int]):
-    return (vec[0], vec[1], vec[2])
-
 def to_tuple_int(vec: [int]):
+    "Return a 3 element tuple from a 3 element vector with its values rounded to an integer"
     return (round(vec[0]), round(vec[1]), round(vec[2]))
 
-def intersection(origin, direction, objects):
+def intersection(origin, ray_direction, scan_objects):
+    "Return information about the closest intersection of a ray"
     min_dist = None
     closest_intersection = None
     closest_object = None
     collided = False
 
-    for o in objects:
+    for o in scan_objects:
         if o["shape"] == "sphere":
-            intersection = sphere_intersection(origin, direction, o)
+            o_intersection = sphere_intersection(origin, ray_direction, o)
             if min_dist is None:
-                min_dist = intersection["dist"]
+                min_dist = o_intersection["dist"]
                 closest_intersection = intersection
                 closest_object = o
-                min_dist = intersection["dist"]
-            elif intersection["dist"] is not None:
-                if intersection["dist"] < min_dist:
+                min_dist = o_intersection["dist"]
+            elif o_intersection["dist"] is not None:
+                if o_intersection["dist"] < min_dist:
                     closest_intersection = intersection
                     closest_object = o
-                    min_dist = intersection["dist"]
-            collided |= intersection["collided"]
+                    min_dist = o_intersection["dist"]
+            # OR equal, set the variable to true the first time it collides
+            collided |= o_intersection["collided"]
 
     return {
         "collided" : collided,
@@ -133,14 +145,15 @@ def intersection(origin, direction, objects):
         }
 
 
-def sphere_intersection(origin: [int], direction: [int], sphere: dict):
+def sphere_intersection(origin: [int], ray_direction: [int], sphere: dict):
+    "Calculate sphere intersection for a ray and a sphere"
     ray_sphere = sub(sphere["pos"], origin)
     dist_sphere = modulus(ray_sphere)
-    dist_hit = dot(ray_sphere, direction)
+    dist_hit = dot(ray_sphere, ray_direction)
     dist_sphere_hit = math.sqrt(abs(dist_sphere**2 - dist_hit**2))
 
     dist_intersection = dist_hit - math.sqrt(abs(sphere["extra"]**2 - dist_sphere_hit**2))
-    point = add(origin, mult(direction, dist_intersection))
+    point = add(origin, mult(ray_direction, dist_intersection))
     normal = normalize(sub(point, sphere["pos"]))
     normal = normalize(add(normal, mult(gen_rand(), sphere["roughness"])))
 
